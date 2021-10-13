@@ -1,4 +1,3 @@
-
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'Components/const_details.dart';
@@ -8,6 +7,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:image_picker/image_picker.dart';
 import 'package:flutter_rounded_date_picker/flutter_rounded_date_picker.dart';
+
 class RegisterStep1 extends StatefulWidget {
   RegisterStep1(this.token);
   String token;
@@ -17,18 +17,19 @@ class RegisterStep1 extends StatefulWidget {
 
 class _RegisterStep1 extends State<RegisterStep1> {
   _RegisterStep1(token);
+
   TextEditingController name = TextEditingController();
   String get _name => name.text;
-  /*TextEditingController dob = TextEditingController();
-  String get _dob => dob.text;*/
+
   TextEditingController security = TextEditingController();
   String get _security => security.text;
-  bool isloading=false;
 
+  bool isloading=false;
   late Future<dynamic> profilefile,idfile;
   String profilebase64Image = '',idbase64Image='';
   String profilepath = '',idpath='';
   var profile_image,id_image;
+  String idstatus="Upload ID";
   String dob="Date of Birth";
 
   void onchooseimage()async{
@@ -52,9 +53,9 @@ class _RegisterStep1 extends State<RegisterStep1> {
     }catch (error) {
       aleart(context, "File Not Picked", false);
     }
-
   }
-  String idstatus="Upload ID";
+
+
   void onchooseimageid()async{
     try {
       ImagePicker picker = ImagePicker();

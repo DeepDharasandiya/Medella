@@ -1,17 +1,8 @@
-
-
-import 'dart:convert';
-import 'dart:io';
-
-
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'Components/api.dart';
 import 'Components/const_details.dart';
-import 'Components/qrcode_scanner.dart';
 import 'Components/utils.dart';
-import 'home_page.dart';
 import 'login.dart';
 
 void main() {

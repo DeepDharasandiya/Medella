@@ -1,5 +1,4 @@
 import 'dart:convert';
-
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'Components/api.dart';
@@ -15,9 +14,7 @@ class RegisterStep2 extends StatefulWidget {
 
 class _RegisterStep2 extends State<RegisterStep2> {
   _RegisterStep2(token,name,security,dob,profile_image,id_image);
-  TextEditingController mobailno = TextEditingController();
 
-  String get _mobailno => mobailno.text;
   bool isChecked1 = false;
   bool isChecked2 = false;
   bool isloading=true;
@@ -26,22 +23,24 @@ class _RegisterStep2 extends State<RegisterStep2> {
   String city='';
   String state='';
   String hospital='';
-  List boarddata=[{"Board": 'GSEB'},{"Board": 'CBSC'}];
+
   @override
   void initState() {
     getstatedata();
   }
   void getstatedata()async{
     var res = await getstate(context, "United States");
+    print(res.body);
     if(res.statusCode==200){
       var data=json.decode(res.body);
       setState(() {
         statedata=data;
-      });
-      setState(() {
         isloading=false;
       });
     }else{
+      setState(() {
+        isloading=false;
+      });
       aleart(context, "Not fetching data", false);
     }
   }
@@ -54,6 +53,9 @@ class _RegisterStep2 extends State<RegisterStep2> {
         citydata=data;
       });
     }else{
+      setState(() {
+        isloading=false;
+      });
       aleart(context, "Not fetching data", false);
     }
   }
@@ -75,12 +77,9 @@ class _RegisterStep2 extends State<RegisterStep2> {
     }
 
   }
-  String dropdownValue ='State';
+
   Widget build(BuildContext context) {
-    double w = (MediaQuery
-        .of(context)
-        .size
-        .width);
+    double w = (MediaQuery.of(context).size.width);
     double unit = (MediaQuery.of(context).size.height) * heightunit + (MediaQuery.of(context).size.width) * widthunit;
     return Scaffold(
       body: SafeArea(
@@ -137,9 +136,7 @@ class _RegisterStep2 extends State<RegisterStep2> {
                               onChanged: (value) {
                                 setState(() {
                                    state=value;
-
                                 });
-
                                 getcitydata(state);
                               },
                             ),
@@ -334,7 +331,6 @@ class _RegisterStep2 extends State<RegisterStep2> {
                     ),
                   ),
                 ),
-
               ],
             ),
           ),

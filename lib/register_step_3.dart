@@ -1,6 +1,4 @@
-
 import 'dart:convert';
-
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -8,8 +6,8 @@ import 'Components/api.dart';
 import 'Components/const_details.dart';
 import 'Components/utils.dart';
 import 'dart:math' as math;
-
 import 'home_page.dart';
+
 class RegisterStep3 extends StatefulWidget {
   RegisterStep3(this.token,this.name,this.security,this.dob,this.profile_image,this.id_image,this.state,this.city,this.hospital);
   String token,name,security,dob,profile_image,id_image,state,city,hospital;
@@ -30,6 +28,9 @@ class _RegisterStep3 extends State<RegisterStep3> with SingleTickerProviderState
   }
 
   void onsenddata()async{
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String? token=prefs.getString('token');
+
     var body= {
       "user_image":widget.profile_image,
       "user_id":widget.id_image,
@@ -41,16 +42,27 @@ class _RegisterStep3 extends State<RegisterStep3> with SingleTickerProviderState
       "city":widget.city,
       "hospial_network":widget.hospital,
     };
-    var res = await api(context, "/api/v1/users/singup",widget.token, body);
+    print("my token "+token.toString());
+    var res = await api(context, "/api/v1/users/singup",token.toString(), body);
     print(res.statusCode);
+    print(res.body);
     if(res.statusCode == 200){
       var data=json.decode(res.body);
       print(data);
-      /*SharedPreferences prefs = await SharedPreferences.getInstance();
+      SharedPreferences prefs = await SharedPreferences.getInstance();
       prefs.setBool("auth", true);
-      prefs.setString("token", data['token']);*/
+      prefs.setString("token", data['token']);
+       _controller.dispose();
+      await aleart(context, "Your Account Successfully Created.", true);
+      Navigator.push(context, MaterialPageRoute(builder: (context){
+        return HomePage();
+      }));
     }else{
-
+      _controller.dispose();
+      setState(() {
+        issuccess=false;
+        isfailed=true;
+      });
     }
   }
 
@@ -80,12 +92,11 @@ class _RegisterStep3 extends State<RegisterStep3> with SingleTickerProviderState
     double w = (MediaQuery.of(context).size.width);
     double unit = (MediaQuery.of(context).size.height) * heightunit + (MediaQuery.of(context).size.width) * widthunit;
    return WillPopScope(
-        onWillPop: () async {
-            _controller.dispose();
-            super.dispose();
-
-          return true;
-        },
+      onWillPop: () async {
+      _controller.dispose();
+      //super.dispose();
+      return true;
+    },
     child: Scaffold(
       body: SafeArea(
         child: Center(
@@ -193,8 +204,6 @@ class _RegisterStep3 extends State<RegisterStep3> with SingleTickerProviderState
                   ],
                 ),
               ),
-
-
             ],
           ),
         ),

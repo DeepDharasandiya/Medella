@@ -1,5 +1,4 @@
 import 'dart:convert';
-
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:country_pickers/country.dart';
@@ -8,22 +7,29 @@ import 'Components/const_details.dart';
 import 'Components/utils.dart';
 import 'login_otp.dart';
 import 'package:country_pickers/country_pickers.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+
 class Login extends StatefulWidget {
   @override
   _Login createState() => new _Login();
 }
 
 class _Login extends State<Login> {
+
   TextEditingController mobailno =TextEditingController();
   String get _mobailno => mobailno.text;
+
   bool isloading=false;
   String country_code='+91';
+
   Country _selectedFilteredDialogCountry =
   CountryPickerUtils.getCountryByPhoneCode('91');
+
   void OnSentOtp()async{
     if(_mobailno!=''){
       if(mobail_number_validation(_mobailno)==true){
+       /* Navigator.push(context, MaterialPageRoute(builder: (context){
+          return LoginOtp('data["temptoken"]');
+        }));*/
         setState(() {
           isloading=true;
         });
@@ -33,20 +39,20 @@ class _Login extends State<Login> {
         var res = await withotheaderapi(context, "/api/v1/users/sendOtp", body);
         print(res.statusCode);
         if(res.statusCode == 200){
-         var data=json.decode(res.body);
-         print(data);
-          setState(() {
-            isloading=false;
-          });
-          await aleart(context, "Verification Code Sent on "+country_code+_mobailno, true);
-          Navigator.push(context, MaterialPageRoute(builder: (context){
-            return LoginOtp(data["temptoken"]);
-          }));
+           var data=json.decode(res.body);
+           print(data);
+            setState(() {
+              isloading=false;
+            });
+            await aleart(context, "Verification Code Sent on "+country_code+_mobailno, true);
+            Navigator.push(context, MaterialPageRoute(builder: (context){
+              return LoginOtp(data["temptoken"]);
+            }));
         }else{
-          setState(() {
-            isloading=false;
-          });
-          aleart(context, "Verification Code not Sent.\nFormat should be XXXXXXXXXX or\n may be server issue occur", false);
+            setState(() {
+              isloading=false;
+            });
+            aleart(context, "Verification Code not Sent.\nFormat should be XXXXXXXXXX or\n may be server issue occur", false);
         }
 
 

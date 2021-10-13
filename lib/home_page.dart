@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-
 import 'Components/const_details.dart';
 import 'Components/utils.dart';
 import 'edit_profile.dart';
@@ -62,7 +61,6 @@ class _HomePage extends State<HomePage> {
         ):
           progressindicator(context),
       ),
-
     );
   }
 }

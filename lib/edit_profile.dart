@@ -1,12 +1,13 @@
 import 'dart:convert';
 import 'dart:io';
+import 'package:http/http.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:flutter/material.dart';
-
 import 'Components/api.dart';
 import 'Components/const_details.dart';
 import 'Components/utils.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
 class EditProfile extends StatefulWidget {
   @override
   _EditProfile createState() => new _EditProfile();
@@ -20,19 +21,27 @@ class _EditProfile extends State<EditProfile> {
   bool isimageedit=false;
   bool isloading =true;
   String profilelink='';
-  void  oneditdone() {
-
-  }
   late Future<dynamic> file;
   String base64Image = '';
   String path = '';
   var _image;
+  var userdata;
+
+  @override
+  void initState() {
+    getdata();
+  }
+
+  void  oneditdone() {
+
+  }
 
   void onchooseimage()async{
     try {
       ImagePicker picker = ImagePicker();
       XFile? image = await picker.pickImage(source: ImageSource.gallery);
-      final bytes = File(image!.path)
+      print(File(image!.path));
+      final bytes = File(image.path)
           .readAsBytesSync()
           .lengthInBytes;
       final kb = bytes / 1024;
@@ -41,6 +50,7 @@ class _EditProfile extends State<EditProfile> {
         String base64 = base64Encode(imageBytes);
         setState(() {
           _image = File(image.path);
+          path=image.path;
           base64Image = base64;
           isimageedit = true;
         });
@@ -58,14 +68,41 @@ class _EditProfile extends State<EditProfile> {
     });
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String? token=prefs.getString('token');
-    if(istextedit){
-      var res = await updatedetails(context, "/api/v1/users/updateMe",token.toString(),);
+    if(istextedit && isimageedit){
+      var body={
+        "username":_name,
+        "dob":userdata["dob"],
+        "mobile":userdata["mobile"],
+        "social_security":userdata["social_security"],
+        "country":userdata["country"],
+        "state":userdata["state"],
+        "city":userdata["city"],
+        "hospial_network":userdata["hospial_network"]
+      };
+
+      var res = await updatedetails(context, "/api/v1/users/updateMe",token.toString(),body);
       if(res.statusCode == 200){
         var data=json.decode(res.body);
         print(data);
-        setState(() {
-          isloading=false;
-        });
+        var body2={
+          "user_image":base64Image,
+        };
+        var res2 = await updatedetails(context, "/api/v1/users/updateDP",token.toString(),body2);
+        if(res2.statusCode == 200){
+          var data2=json.decode(res2.body);
+          print(data2);
+          setState(() {
+            isloading=false;
+          });
+          await aleart(context, "Data Updates Successfully.", true);
+          Navigator.pop(context);
+
+        }else{
+          setState(() {
+            isloading=false;
+          });
+          aleart(context, "Server Didn't response", false);
+        }
 
       }else{
         setState(() {
@@ -73,14 +110,48 @@ class _EditProfile extends State<EditProfile> {
         });
         aleart(context, "Server Didn't response", false);
       }
-    }else{
-      var res = await updatedetails(context, "/api/v1/users/updateDP",token.toString(),);
+    }else if(istextedit){
+      var body={
+        "username":_name,
+        "dob":userdata["dob"],
+        "mobile":userdata["mobile"],
+        "social_security":userdata["social_security"],
+        "country":userdata["country"],
+        "state":userdata["state"],
+        "city":userdata["city"],
+        "hospial_network":userdata["hospial_network"]
+      };
+      var res = await updatedetails(context, "/api/v1/users/updateMe",token.toString(),body);
       if(res.statusCode == 200){
         var data=json.decode(res.body);
         print(data);
         setState(() {
           isloading=false;
         });
+        await aleart(context, "Data Updates Successfully.", true);
+      }else{
+        setState(() {
+          isloading=false;
+        });
+        await aleart(context, "Server Didn't response", false);
+        Navigator.pop(context);
+
+      }
+    }else if(isimageedit){
+      print(base64Image);
+      var body={
+        "user_image":await _image.readAsBytesSync().toString()
+      };
+      var res = await updatedetails(context, "/api/v1/users/updateDP",token.toString(),body);
+      print(res.body);
+      if(res.statusCode == 200){
+        var data=json.decode(res.body);
+        print(data);
+        setState(() {
+          isloading=false;
+        });
+        await aleart(context, "Server Didn't response", false);
+        Navigator.pop(context);
 
       }else{
         setState(() {
@@ -88,21 +159,27 @@ class _EditProfile extends State<EditProfile> {
         });
         aleart(context, "Server Didn't response", false);
       }
+    }else {
+      setState(() {
+        isloading=false;
+      });
+      Navigator.pop(context);
     }
 
   }
   void getdata()async{
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String? token=prefs.getString('token');
-
+    print("token = " +token.toString());
     var res = await getdetails(context, "/api/v1/users/getMe",token.toString(),);
     if(res.statusCode == 200){
       var data=json.decode(res.body);
-      print(data);
+      print(data['data']);
       setState(() {
-        //profilelink=;
-        //username='';
-        //name =TextEditingController(text: );
+        userdata=data["data"];
+        profilelink=data['data']['user_image'];
+        username=data['data']['username'];
+        name =TextEditingController(text: data['data']['username']);
         isloading=false;
       });
 
@@ -112,16 +189,11 @@ class _EditProfile extends State<EditProfile> {
       });
       aleart(context, "Server Didn't response", false);
     }
+  }
 
 
-  }
-  @override
-  void initState() {
-    getdata();
-  }
 
   Widget build(BuildContext context) {
-    //name =TextEditingController(text: username);
     double w=(MediaQuery.of(context).size.width);
     double unit = (MediaQuery.of(context).size.height) * heightunit + (MediaQuery.of(context).size.width) * widthunit;
     return Scaffold(
@@ -169,7 +241,6 @@ class _EditProfile extends State<EditProfile> {
                                   padding: EdgeInsets.only(left: 10*unit),
                                   child: MyText(context,"Edit Profile",TextAlign.start,bluecolor,20*unit,FontWeight.w600)
                               ),
-
                             ],
                           ),
                         ),
@@ -198,6 +269,9 @@ class _EditProfile extends State<EditProfile> {
                       children: [
                         GestureDetector(
                           onTap: () {
+                            setState(() {
+                              isimageedit=true;
+                            });
                             onchooseimage();
                           },
                           child: Container(
@@ -209,7 +283,7 @@ class _EditProfile extends State<EditProfile> {
                                 image: FileImage(_image),
                                 fit: BoxFit.cover,
                               ):DecorationImage(
-                                image: NetworkImage('https://flutter.github.io/assets-for-api-docs/assets/widgets/owl-2.jpg'),
+                                image: NetworkImage(profilelink),
                                 fit: BoxFit.cover,
                               ),
                               border: Border.all(
@@ -266,7 +340,6 @@ class _EditProfile extends State<EditProfile> {
         ):
         progressindicator(context),
       ),
-
     );
   }
 }
