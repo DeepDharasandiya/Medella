@@ -9,23 +9,27 @@ import 'dart:io';
 import 'package:image_picker/image_picker.dart';
 import 'package:flutter_rounded_date_picker/flutter_rounded_date_picker.dart';
 class RegisterStep1 extends StatefulWidget {
+  RegisterStep1(this.token);
+  String token;
   @override
-  _RegisterStep1 createState() => new _RegisterStep1();
+  _RegisterStep1 createState() => new _RegisterStep1(token);
 }
 
 class _RegisterStep1 extends State<RegisterStep1> {
+  _RegisterStep1(token);
   TextEditingController name = TextEditingController();
   String get _name => name.text;
-  TextEditingController dob = TextEditingController();
-  String get _dob => dob.text;
-  TextEditingController mobailno = TextEditingController();
-  String get _mobailno => mobailno.text;
+  /*TextEditingController dob = TextEditingController();
+  String get _dob => dob.text;*/
+  TextEditingController security = TextEditingController();
+  String get _security => security.text;
+  bool isloading=false;
 
-
-  late Future<dynamic> file;
-  String base64Image = '';
-  String path = '';
-  var _image;
+  late Future<dynamic> profilefile,idfile;
+  String profilebase64Image = '',idbase64Image='';
+  String profilepath = '',idpath='';
+  var profile_image,id_image;
+  String dob="Date of Birth";
 
   void onchooseimage()async{
     try {
@@ -39,8 +43,8 @@ class _RegisterStep1 extends State<RegisterStep1> {
         final imageBytes = File(image.path).readAsBytesSync();
         String base64 = base64Encode(imageBytes);
         setState(() {
-          _image = File(image.path);
-          base64Image = base64;
+          profile_image = File(image.path);
+          profilebase64Image = base64;
         });
       } else {
         aleart(context, "Please Select file less than 100KB", false);
@@ -50,13 +54,43 @@ class _RegisterStep1 extends State<RegisterStep1> {
     }
 
   }
+  String idstatus="Upload ID";
+  void onchooseimageid()async{
+    try {
+      ImagePicker picker = ImagePicker();
+      XFile? image = await picker.pickImage(source: ImageSource.gallery);
+      final bytes = File(image!.path)
+          .readAsBytesSync()
+          .lengthInBytes;
+      final kb = bytes / 1024;
+      if (kb <= 100) {
+        final imageBytes = File(image.path).readAsBytesSync();
+        String base64 = base64Encode(imageBytes);
+        setState(() {
+          id_image = File(image.path);
+          idbase64Image = base64;
+          idstatus="ID Uploaded";
+        });
+        aleart(context, "ID Uploaded", true);
+      } else {
+        aleart(context, "Please Select file less than 100KB", false);
+      }
+    }catch (error) {
+      aleart(context, "File Not Picked", false);
+    }
 
-  void onnext() {
-    Navigator.push(context, MaterialPageRoute(builder: (context){
-      return RegisterStep2();
-    }));
   }
-  String dob1="Date of Birth";
+  void onnext() {
+    if(_name!='' && _security !='' && dob!="Date of Birth" && profilebase64Image!='' && idbase64Image!=''){
+      Navigator.push(context, MaterialPageRoute(builder: (context){
+        return RegisterStep2(widget.token,_name,_security,dob,profilebase64Image,idbase64Image);
+      }));
+    }else{
+      aleart(context, "All Details are Required.", false);
+    }
+
+  }
+
   void date(double unit)async{
     DateTime? newDateTime = await showRoundedDatePicker(
       height: 200.0*unit,
@@ -67,7 +101,7 @@ class _RegisterStep1 extends State<RegisterStep1> {
       theme: ThemeData(primarySwatch: Colors.blue),
     );
     setState(() {
-      dob1 = (newDateTime!.year).toString()+"-"+(newDateTime.month).toString()+"-"+(newDateTime.day).toString();
+      dob = (newDateTime!.year).toString()+"-"+(newDateTime.month).toString()+"-"+(newDateTime.day).toString();
     });
   }
 
@@ -76,7 +110,7 @@ class _RegisterStep1 extends State<RegisterStep1> {
     double unit = (MediaQuery.of(context).size.height) * heightunit + (MediaQuery.of(context).size.width) * widthunit;
     return Scaffold(
       body: SafeArea(
-        child: SingleChildScrollView(
+        child: isloading==false?SingleChildScrollView(
           child: Center(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.start,
@@ -89,13 +123,13 @@ class _RegisterStep1 extends State<RegisterStep1> {
                     onTap: () {
                       onchooseimage();
                     },
-                    child: base64Image!=''?Container(
+                    child: profilebase64Image!=''?Container(
                       height: 100*unit,
                       width:100*unit,
                       decoration: BoxDecoration(
                         color: whitecolor,
                         image: DecorationImage(
-                          image: FileImage(_image),
+                          image: FileImage(profile_image),
                           fit: BoxFit.cover,
                         ),
                         border: Border.all(
@@ -151,8 +185,8 @@ class _RegisterStep1 extends State<RegisterStep1> {
                 Padding(
                     padding: EdgeInsets.only(top: 10 * unit),
                     child: MyTextField(
-                        context, Icons.security , "Social Security", 20 * unit, TextInputType.text,
-                        false, name, 35 * unit, 300 * unit)
+                        context, Icons.security , "Social Security", 20 * unit, TextInputType.number,
+                        false, security, 35 * unit, 300 * unit)
                 ),
                 Padding(
                     padding: EdgeInsets.only(top: 10 * unit),
@@ -187,7 +221,7 @@ class _RegisterStep1 extends State<RegisterStep1> {
                             ),
                             Padding(
                               padding: EdgeInsets.all(0),
-                              child: MyText(context,dob1,TextAlign.start,greycolor,20*unit,FontWeight.normal),
+                              child: MyText(context,dob,TextAlign.start,greycolor,20*unit,FontWeight.normal),
                             ),
 
                           ],
@@ -199,7 +233,7 @@ class _RegisterStep1 extends State<RegisterStep1> {
                     padding: EdgeInsets.only(top: 10 * unit),
                     child:InkWell(
                       onTap: () {
-                      //  date(unit);
+                        onchooseimageid();
                       },
                       child: Container(
                         width: 300*unit,
@@ -228,7 +262,7 @@ class _RegisterStep1 extends State<RegisterStep1> {
                             ),
                             Padding(
                               padding: EdgeInsets.all(0),
-                              child: MyText(context,"Upload Id",TextAlign.start,greycolor,20*unit,FontWeight.normal),
+                              child: MyText(context,idstatus,TextAlign.start,greycolor,20*unit,FontWeight.normal),
                             ),
 
                           ],
@@ -236,18 +270,6 @@ class _RegisterStep1 extends State<RegisterStep1> {
                       ),
                     )
                 ),
-              /*  Padding(
-                    padding: EdgeInsets.only(top: 10 * unit),
-                    child:GestureDetector(
-                      onTap: () {
-
-                      },
-                      child: MyTextField(
-                          context, Icons.contact_mail_rounded , "Upload Id(on progress)", 20 * unit, TextInputType.text,
-                          false, name, 35 * unit, 300 * unit)
-                    )
-                ),*/
-
                 Padding(
                     padding: EdgeInsets.only(top: 60*unit),
                     child: RightIconBtn(context,Icons.arrow_forward ,bluecolor,"Next",20.0*unit,45*unit,280*unit,onnext)
@@ -255,7 +277,8 @@ class _RegisterStep1 extends State<RegisterStep1> {
               ],
             ),
           ),
-        ),
+        ):
+        progressindicator(context),
       ),
     );
   }

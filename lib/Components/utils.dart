@@ -29,7 +29,7 @@ Widget progressindicator(BuildContext context) {
         mainAxisAlignment: MainAxisAlignment.center,
         children: <Widget>[
           CircularProgressIndicator(
-            strokeWidth:30*unit ,
+            strokeWidth:3*unit ,
           ),
           Padding(
             padding: EdgeInsets.only(top:20*unit),
@@ -95,7 +95,7 @@ aleart(BuildContext context,String message,bool status) async {
                       child: MyText(context,message,TextAlign.center,status?bluecolor:redcolor,17*unit,FontWeight.w800)
                   ),
                   Padding(
-                      padding: EdgeInsets.only(top: 30*unit),
+                      padding: EdgeInsets.only(top: 15*unit),
                       child: LeftIconBtn(context,Icons.done,bluecolor,"Ok",20.0*unit,45*unit,200*unit,onclick)
                   ),
                 ],
@@ -156,6 +156,70 @@ Widget MyTextField(BuildContext context,IconData iconname,String label,double la
                     ),
                   ),
                 ),
+              enabledBorder: OutlineInputBorder(
+                borderSide:  BorderSide(color: bluecolor, width: 3*unit),
+                borderRadius:  BorderRadius.circular(h),
+              ),
+              focusedBorder:OutlineInputBorder(
+                borderSide: BorderSide(color: bluecolor, width: 3*unit),
+                borderRadius: BorderRadius.circular(h),
+              ),
+              hintText: label,
+              hintStyle: TextStyle(
+                fontSize:labelsize,
+                color: greycolor,
+              ),
+              contentPadding: EdgeInsets.fromLTRB(0, 12*unit, 20*unit, 12*unit),
+
+            ),
+          ),
+        ],
+      ),
+    ),
+  );
+}
+Widget MobileTextField(BuildContext context,IconData iconname,String label,double labelsize,TextInputType inputType,bool flag, TextEditingController data,double h,double w) {
+  double unit=(MediaQuery.of(context).size.height)*heightunit+(MediaQuery.of(context).size.width)*widthunit;
+  return Container(
+    width:w,
+    child: Center(
+      child:Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          TextField(
+            textAlignVertical: TextAlignVertical.center,
+            controller:data,
+            maxLength: 10,
+            obscureText: flag,
+            keyboardType: inputType,
+            style: TextStyle(
+              fontSize:labelsize,
+              color: blackcolor,
+            ),
+            decoration: InputDecoration(
+              prefixIcon:Padding(
+                padding: EdgeInsetsDirectional.only(start:  20*unit),
+                child: Container(
+                  width:50*unit,
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: [
+                      Icon(
+                        iconname,
+                        color: bluecolor,
+                        size: 25*unit,
+                        semanticLabel: 'Text to announce in accessibility modes',
+                      ),
+                      Padding(
+                          padding: EdgeInsets.fromLTRB(10*unit, 0, 10*unit, 0),
+                          child: VerticalLine(context,1.5*unit,25*unit)
+                      ),
+                    ],
+                  ),
+                ),
+              ),
               enabledBorder: OutlineInputBorder(
                 borderSide:  BorderSide(color: bluecolor, width: 3*unit),
                 borderRadius:  BorderRadius.circular(h),

@@ -1,10 +1,13 @@
 
 
+import 'dart:convert';
 import 'dart:io';
+
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'Components/api.dart';
 import 'Components/const_details.dart';
 import 'Components/qrcode_scanner.dart';
 import 'Components/utils.dart';
@@ -12,6 +15,7 @@ import 'home_page.dart';
 import 'login.dart';
 
 void main() {
+  WidgetsFlutterBinding.ensureInitialized();
   SystemChrome.setPreferredOrientations(
       [DeviceOrientation.portraitUp, DeviceOrientation.portraitDown]);
   runApp( MaterialApp( debugShowCheckedModeBanner:false,home:MyApp() ));
@@ -47,7 +51,7 @@ class _MyApp extends State<MyApp> {
                     child: MyText(context,"Welcome To Medella\nContinue with",TextAlign.center,greycolor,17*unit,FontWeight.w800)
                 ),
                 Padding(
-                    padding: EdgeInsets.only(top: 180*unit),
+                    padding: EdgeInsets.only(top: 160*unit,bottom: 20*unit),
                     child: LeftIconBtn(context,Icons.login,bluecolor,"Login",20.0*unit,45*unit,280*unit,OnLogin)
                 ),
               ],
@@ -57,33 +61,5 @@ class _MyApp extends State<MyApp> {
       ),
     );
   }
-  /*Widget build(BuildContext context) {
-    double unit=(MediaQuery.of(context).size.height)*heightunit+(MediaQuery.of(context).size.width)*widthunit;
-    return Scaffold(
-      body: SafeArea(
-        child:Center(
-          child: SingleChildScrollView(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                Padding(
-                    padding: EdgeInsets.only(top: 0),
-                    child: MyBodyHeader(context)
-                ),
-                Padding(
-                    padding: EdgeInsets.only(top: 40*unit),
-                    child: MyText(context,"Welcome To Medella\nContinue with",TextAlign.center,greycolor,17*unit,FontWeight.w800)
-                ),
-                Padding(
-                    padding: EdgeInsets.only(top: 180*unit),
-                    child: LeftIconBtn(context,Icons.login,"Login",20.0*unit,45*unit,280*unit,OnLogin)
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }*/
+
 }

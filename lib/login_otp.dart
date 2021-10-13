@@ -1,20 +1,24 @@
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-
+import 'Components/api.dart';
 import 'Components/const_details.dart';
 import 'Components/utils.dart';
+import 'home_page.dart';
 import 'register_step_1.dart';
-
+import 'package:shared_preferences/shared_preferences.dart';
 
 class LoginOtp extends StatefulWidget {
+  LoginOtp(this.verification_token);
+  String verification_token;
   @override
-  _LoginOtp createState() => new _LoginOtp();
+  _LoginOtp createState() => new _LoginOtp(verification_token);
 }
 
 class _LoginOtp extends State<LoginOtp> {
+  _LoginOtp(verification_token);
   TextEditingController otp1 =TextEditingController();
   String get _otp1 => otp1.text;
   TextEditingController otp2 =TextEditingController();
@@ -22,16 +26,17 @@ class _LoginOtp extends State<LoginOtp> {
   TextEditingController otp3 =TextEditingController();
   String get _otp3 => otp3.text;
   TextEditingController otp4 =TextEditingController();
-  String get _otp4 => otp1.text;
+  String get _otp4 => otp4.text;
   TextEditingController otp5 =TextEditingController();
   String get _otp5 => otp5.text;
   TextEditingController otp6 =TextEditingController();
-  String get _otp6 => otp1.text;
-
+  String get _otp6 => otp6.text;
+   bool isloading=false;
   late Timer _timer,_timer2;
-  int time = 10;
+  String temptoken='';
+  int time = 2;
   void startTimer() {
-    time = 10;
+    time = 2;
     _timer =  Timer.periodic(
       const Duration(seconds: 1),
           (Timer timer) => {
@@ -48,12 +53,93 @@ class _LoginOtp extends State<LoginOtp> {
     );
   }
   void initState() {
+    setState(() {
+      temptoken=widget.verification_token;
+    });
     startTimer();
   }
-  void OnVerify(){
-    Navigator.push(context, MaterialPageRoute(builder: (context){
-      return RegisterStep1();
-    }));
+  void Onotpresend()async{
+    if(time==0){
+      setState(() {
+        isloading=true;
+      });
+
+      var body= {
+        "temptoken":temptoken,
+      };
+      var res = await withotheaderapi(context, "/api/v1/users/resendOtp", body);
+      if(res.statusCode == 200){
+        var data=json.decode(res.body);
+        print(data);
+        setState(() {
+          temptoken=data["temptoken"];
+          isloading=false;
+        });
+        aleart(context, "Verification Code Resent on "+data['phonenumber'], true);
+      }else{
+        setState(() {
+          isloading=false;
+        });
+        aleart(context, "Otp Not Resend", false);
+      }
+
+    }else{
+      aleart(context, "You can try resend OTP after timer time over.", false);
+    }
+  }
+  void OnVerify()async{
+    if(_otp1 !='' && _otp2 !='' && _otp3 !='' && _otp4 !='' && _otp5 !='' && _otp6!=''){
+      String finalotp=_otp1+_otp2+_otp3+_otp4+_otp5+_otp6;
+      /*Navigator.push(context, MaterialPageRoute(builder: (context){
+        return RegisterStep1("res.token");
+      }));*/
+      setState(() {
+        isloading=true;
+      });
+      var body= {
+        "otp":finalotp,
+        "temptoken":widget.verification_token,
+      };
+      var res = await withotheaderapi(context, "/api/v1/users/verifyOtp", body);
+      print(res.statusCode);
+      if(res.statusCode == 200){
+        var data=json.decode(res.body);
+        print(data);
+        aleart(context, "Your OTP is Verified", true);
+        if(data["status"]=="sucess"){
+          SharedPreferences prefs = await SharedPreferences.getInstance();
+          prefs.setBool("auth", true);
+          prefs.setString("token", data['token']);
+          setState(() {
+            isloading=false;
+          });
+          await aleart(context, "Your Account Verified", true);
+          if(data["user"]=="old"){
+            Navigator.push(context, MaterialPageRoute(builder: (context){
+              return HomePage();
+            }));
+          }else{
+            Navigator.push(context, MaterialPageRoute(builder: (context){
+              return RegisterStep1(data['token']);
+            }));
+          }
+
+        }else{
+          setState(() {
+            isloading=false;
+          });
+          aleart(context, "OTP not Verified ,Enter Valid OTP", false);
+        }
+      }else{
+        aleart(context, "Enter Valid OTP", false);
+      }
+
+
+
+
+    }else{
+      aleart(context, "OTP is Required.", false);
+    }
 
   }
   Widget build(BuildContext context) {
@@ -66,7 +152,7 @@ class _LoginOtp extends State<LoginOtp> {
      child: Scaffold(
       body: SafeArea(
         child: Center(
-          child:SingleChildScrollView(
+          child:isloading==false?SingleChildScrollView(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.center,
@@ -117,9 +203,7 @@ class _LoginOtp extends State<LoginOtp> {
                           children: [
                             InkWell(
                               onTap:(){
-                                if(time==0){
-
-                                }
+                                Onotpresend();
                               },
                               child: Row(
                                 children: [
@@ -147,7 +231,8 @@ class _LoginOtp extends State<LoginOtp> {
                 ),
               ],
             ),
-          ),
+          ):
+          progressindicator(context),
         ),
       ),
      ),

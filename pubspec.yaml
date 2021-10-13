@@ -39,6 +39,8 @@ dependencies:
   connectivity:
   http:
   flutter_rounded_date_picker:
+  shared_preferences: any
+  country_pickers: ^2.0.0
 
 dev_dependencies:
   flutter_test:

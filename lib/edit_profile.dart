@@ -3,19 +3,23 @@ import 'dart:io';
 import 'package:image_picker/image_picker.dart';
 import 'package:flutter/material.dart';
 
+import 'Components/api.dart';
 import 'Components/const_details.dart';
 import 'Components/utils.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 class EditProfile extends StatefulWidget {
   @override
   _EditProfile createState() => new _EditProfile();
 }
 
 class _EditProfile extends State<EditProfile> {
-  TextEditingController name =TextEditingController(text: "User name");
+  TextEditingController name =TextEditingController();
   String get _name => name.text;
-  String username='User Name';
+  String username='';
   bool istextedit=false;
   bool isimageedit=false;
+  bool isloading =true;
+  String profilelink='';
   void  oneditdone() {
 
   }
@@ -48,6 +52,73 @@ class _EditProfile extends State<EditProfile> {
     }
 
   }
+  void updatedata()async{
+    setState(() {
+      isloading=true;
+    });
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String? token=prefs.getString('token');
+    if(istextedit){
+      var res = await updatedetails(context, "/api/v1/users/updateMe",token.toString(),);
+      if(res.statusCode == 200){
+        var data=json.decode(res.body);
+        print(data);
+        setState(() {
+          isloading=false;
+        });
+
+      }else{
+        setState(() {
+          isloading=false;
+        });
+        aleart(context, "Server Didn't response", false);
+      }
+    }else{
+      var res = await updatedetails(context, "/api/v1/users/updateDP",token.toString(),);
+      if(res.statusCode == 200){
+        var data=json.decode(res.body);
+        print(data);
+        setState(() {
+          isloading=false;
+        });
+
+      }else{
+        setState(() {
+          isloading=false;
+        });
+        aleart(context, "Server Didn't response", false);
+      }
+    }
+
+  }
+  void getdata()async{
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String? token=prefs.getString('token');
+
+    var res = await getdetails(context, "/api/v1/users/getMe",token.toString(),);
+    if(res.statusCode == 200){
+      var data=json.decode(res.body);
+      print(data);
+      setState(() {
+        //profilelink=;
+        //username='';
+        //name =TextEditingController(text: );
+        isloading=false;
+      });
+
+    }else{
+      setState(() {
+        isloading=false;
+      });
+      aleart(context, "Server Didn't response", false);
+    }
+
+
+  }
+  @override
+  void initState() {
+    getdata();
+  }
 
   Widget build(BuildContext context) {
     //name =TextEditingController(text: username);
@@ -66,19 +137,15 @@ class _EditProfile extends State<EditProfile> {
               padding: EdgeInsets.only(right: 20*unit),
               child: GestureDetector(
                 onTap: () {
-                  oneditdone();
+                  updatedata();
                 },
-                child: Icon(
-                  Icons.done,
-                  color: bluecolor,
-                  size: 30*unit,
-                ),
+                child: MyText(context,"Save",TextAlign.center,bluecolor,12*unit,FontWeight.w600),
               )
           ),
         ],
       ),
       body: SafeArea(
-        child: SingleChildScrollView(
+        child: isloading==false?SingleChildScrollView(
           child: Center(
             child: Column(
               children: [
@@ -196,7 +263,8 @@ class _EditProfile extends State<EditProfile> {
               ],
             ),
           ),
-        ),
+        ):
+        progressindicator(context),
       ),
 
     );

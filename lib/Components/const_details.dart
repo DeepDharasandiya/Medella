@@ -4,8 +4,10 @@ var pixelRatio = window.devicePixelRatio;
 var physicalScreenSize = window.physicalSize;
 var physicalWidth = physicalScreenSize.width/2;
 var physicalHeight = physicalScreenSize.height/2;
-const heightunit=0.0009562;
-const widthunit=0.0008333;
+//const heightunit=0.0009562;
+//const widthunit=0.0008333;
+const heightunit=0.0009362;
+const widthunit=0.0008133;
 const heightunit2=0.0010928;
 const widthunit2=0.00055555;
 

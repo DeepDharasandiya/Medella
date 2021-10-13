@@ -9,6 +9,7 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePage extends State<HomePage> {
+  bool isloading=false;
   void onprofile() {
     Navigator.push(context, MaterialPageRoute(builder: (context){
       return EditProfile();
@@ -45,7 +46,7 @@ class _HomePage extends State<HomePage> {
         ],
       ),
       body: SafeArea(
-        child: SingleChildScrollView(
+        child: isloading==false?SingleChildScrollView(
           child: Center(
             child: Column(
                 mainAxisAlignment: MainAxisAlignment.start,
@@ -58,7 +59,8 @@ class _HomePage extends State<HomePage> {
               ],
             ),
           ),
-        ),
+        ):
+          progressindicator(context),
       ),
 
     );
